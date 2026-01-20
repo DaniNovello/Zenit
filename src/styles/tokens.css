@@ -1,0 +1,16 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --card: rgba(255, 255, 255, 0.7);
+  --stroke: rgba(255, 255, 255, 0.6);
+  --text: #1a1f2c;
+  --muted: #6b7280;
+  --accent: #0f766e;
+  --accent-soft: #14b8a6;
+  --accent-dark: #0b4f49;
+  --highlight: #f6c351;
+  --shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+}

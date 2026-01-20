@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fluxo - Gestor Financeiro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">F</div>
+          <div class="brand-text">
+            <span class="brand-title">Fluxo</span>
+            <span class="brand-sub">gestor financeiro</span>
+          </div>
+        </div>
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" data-section="dashboard">Dashboard</button>
+          <button class="nav-item" data-section="cartoes">Cartoes</button>
+          <button class="nav-item" data-section="extrato">Extrato</button>
+          <button class="nav-item" data-section="metas">Metas</button>
+          <button class="nav-item" data-section="investimentos">Investimentos</button>
+          <button class="nav-item" data-section="configuracoes">Configuracoes</button>
+        </nav>
+        <div class="sidebar-card">
+          <p class="sidebar-card-title">Saldo atual</p>
+          <p class="sidebar-card-value">R$ 12.480,90</p>
+          <p class="sidebar-card-note">Atualizado agora</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="screen active" data-section="dashboard">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Bem-vindo, Diego</p>
+              <h1>Visao geral</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Novo lancamento</button>
+              <button class="icon-btn" aria-label="Notificacoes">• • •</button>
+            </div>
+          </header>
+
+          <section class="cards">
+            <article class="glass-card reveal">
+              <p class="card-label">Entrada do mes</p>
+              <p class="card-value">R$ 18.250,00</p>
+              <p class="card-trend up">+12% vs ultimo mes</p>
+            </article>
+            <article class="glass-card reveal">
+              <p class="card-label">Saidas do mes</p>
+              <p class="card-value">R$ 7.940,00</p>
+              <p class="card-trend down">-6% vs ultimo mes</p>
+            </article>
+            <article class="glass-card reveal">
+              <p class="card-label">Economia</p>
+              <p class="card-value">R$ 3.500,00</p>
+              <p class="card-trend up">Meta 70%</p>
+            </article>
+          </section>
+
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Cartoes de credito</h2>
+                <button class="ghost">Gerenciar</button>
+              </div>
+              <div class="credit-cards">
+                <article class="credit-card reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 1289</p>
+                  <p class="credit-holder">Diego Novello</p>
+                  <p class="credit-limit">Limite R$ 8.000</p>
+                </article>
+                <article class="credit-card alt reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 6420</p>
+                  <p class="credit-holder">Fluxo Prime</p>
+                  <p class="credit-limit">Limite R$ 12.000</p>
+                </article>
+                <article class="credit-card dark reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 2233</p>
+                  <p class="credit-holder">Business</p>
+                  <p class="credit-limit">Limite R$ 20.000</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Proximos pagamentos</h2>
+                <button class="ghost">Ver todos</button>
+              </div>
+              <ul class="list">
+                <li>
+                  <span>Fatura Cartao Fluxo</span>
+                  <span>R$ 1.240,00</span>
+                </li>
+                <li>
+                  <span>Academia</span>
+                  <span>R$ 149,00</span>
+                </li>
+                <li>
+                  <span>Assinaturas</span>
+                  <span>R$ 89,90</span>
+                </li>
+                <li>
+                  <span>Internet</span>
+                  <span>R$ 119,90</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Extrato</h2>
+                <button class="ghost">Baixar</button>
+              </div>
+              <div class="statement">
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Mercado Central</p>
+                    <p class="statement-sub">Cartao - Hoje</p>
+                  </div>
+                  <span class="statement-amount down">- R$ 320,40</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Salario</p>
+                    <p class="statement-sub">Entrada - Ontem</p>
+                  </div>
+                  <span class="statement-amount up">+ R$ 4.200,00</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Delivery</p>
+                    <p class="statement-sub">Pix - 2 dias</p>
+                  </div>
+                  <span class="statement-amount down">- R$ 74,90</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Freelance</p>
+                    <p class="statement-sub">Entrada - 3 dias</p>
+                  </div>
+                  <span class="statement-amount up">+ R$ 980,00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Metas</h2>
+                <button class="ghost">Editar</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Reserva</span>
+                  <span>R$ 7.000 / 10.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 70%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Viagem</span>
+                  <span>R$ 2.100 / 4.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar alt" style="width: 52%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Novo notebook</span>
+                  <span>R$ 1.500 / 6.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 25%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" data-section="cartoes">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Cartoes</p>
+              <h1>Seus cartoes</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Adicionar cartao</button>
+            </div>
+          </header>
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Principais cartoes</h2>
+                <button class="ghost">Limites</button>
+              </div>
+              <div class="credit-cards">
+                <article class="credit-card reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 1289</p>
+                  <p class="credit-holder">Diego Novello</p>
+                  <p class="credit-limit">Disponivel R$ 4.680</p>
+                </article>
+                <article class="credit-card alt reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 6420</p>
+                  <p class="credit-holder">Fluxo Prime</p>
+                  <p class="credit-limit">Disponivel R$ 7.200</p>
+                </article>
+                <article class="credit-card dark reveal">
+                  <div class="card-chip"></div>
+                  <p class="credit-number">**** 2233</p>
+                  <p class="credit-holder">Business</p>
+                  <p class="credit-limit">Disponivel R$ 12.500</p>
+                </article>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Faturas abertas</h2>
+                <button class="ghost">Detalhar</button>
+              </div>
+              <ul class="list">
+                <li>
+                  <span>Fluxo Prime</span>
+                  <span>R$ 1.240,00</span>
+                </li>
+                <li>
+                  <span>Business</span>
+                  <span>R$ 2.890,00</span>
+                </li>
+                <li>
+                  <span>Cartao pessoal</span>
+                  <span>R$ 890,00</span>
+                </li>
+              </ul>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Alertas</h2>
+                <button class="ghost">Ajustar</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Uso do limite</span>
+                  <span>62%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 62%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Assinaturas</span>
+                  <span>R$ 210</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 40%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" data-section="extrato">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Extrato</p>
+              <h1>Movimentacoes</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Filtrar</button>
+              <button class="icon-btn" aria-label="Exportar">⇩</button>
+            </div>
+          </header>
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Ultimas transacoes</h2>
+                <button class="ghost">Exportar</button>
+              </div>
+              <div class="statement">
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Mercado Central</p>
+                    <p class="statement-sub">Cartao - Hoje</p>
+                  </div>
+                  <span class="statement-amount down">- R$ 320,40</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Salario</p>
+                    <p class="statement-sub">Entrada - Ontem</p>
+                  </div>
+                  <span class="statement-amount up">+ R$ 4.200,00</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Restaurante</p>
+                    <p class="statement-sub">Pix - 2 dias</p>
+                  </div>
+                  <span class="statement-amount down">- R$ 210,00</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Freelance</p>
+                    <p class="statement-sub">Entrada - 3 dias</p>
+                  </div>
+                  <span class="statement-amount up">+ R$ 980,00</span>
+                </div>
+                <div class="statement-row">
+                  <div>
+                    <p class="statement-title">Uber</p>
+                    <p class="statement-sub">Cartao - 4 dias</p>
+                  </div>
+                  <span class="statement-amount down">- R$ 38,90</span>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Resumo</h2>
+                <button class="ghost">Mes</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Entradas</span>
+                  <span>R$ 12.880</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 82%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Saidas</span>
+                  <span>R$ 7.200</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar alt" style="width: 58%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Economia</span>
+                  <span>R$ 5.680</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 64%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" data-section="metas">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Metas</p>
+              <h1>Planejamento</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Nova meta</button>
+            </div>
+          </header>
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Metas em andamento</h2>
+                <button class="ghost">Prioridades</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Reserva de emergencia</span>
+                  <span>R$ 7.000 / 10.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 70%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Viagem internacional</span>
+                  <span>R$ 2.100 / 4.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar alt" style="width: 52%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Novo notebook</span>
+                  <span>R$ 1.500 / 6.000</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 25%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Planejado</h2>
+                <button class="ghost">Editar</button>
+              </div>
+              <ul class="list">
+                <li>
+                  <span>Casa propria</span>
+                  <span>R$ 1.200 / mes</span>
+                </li>
+                <li>
+                  <span>Carro</span>
+                  <span>R$ 900 / mes</span>
+                </li>
+                <li>
+                  <span>Curso</span>
+                  <span>R$ 350 / mes</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" data-section="investimentos">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Investimentos</p>
+              <h1>Carteira</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Novo aporte</button>
+            </div>
+          </header>
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Distribuicao</h2>
+                <button class="ghost">Comparar</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Renda fixa</span>
+                  <span>45%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 45%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Fundos imobiliarios</span>
+                  <span>28%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar alt" style="width: 28%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>Acoes</span>
+                  <span>27%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 27%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Rentabilidade</h2>
+                <button class="ghost">Periodo</button>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>12 meses</span>
+                  <span class="statement-amount up">+ 14,2%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 72%"></div>
+                </div>
+              </div>
+              <div class="goal">
+                <div class="goal-row">
+                  <span>24 meses</span>
+                  <span class="statement-amount up">+ 22,9%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar soft" style="width: 60%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen" data-section="configuracoes">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Configuracoes</p>
+              <h1>Preferencias</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="pill">Salvar</button>
+            </div>
+          </header>
+          <section class="grid">
+            <div class="panel wide">
+              <div class="panel-header">
+                <h2>Perfil</h2>
+                <button class="ghost">Editar</button>
+              </div>
+              <ul class="list">
+                <li>
+                  <span>Nome</span>
+                  <span>Diego Novello</span>
+                </li>
+                <li>
+                  <span>Email</span>
+                  <span>diego@fluxo.app</span>
+                </li>
+                <li>
+                  <span>Telefone</span>
+                  <span>+55 11 99999-0000</span>
+                </li>
+              </ul>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h2>Alertas</h2>
+                <button class="ghost">Gerenciar</button>
+              </div>
+              <ul class="list">
+                <li>
+                  <span>Gastos acima de R$ 500</span>
+                  <span>Ativo</span>
+                </li>
+                <li>
+                  <span>Lembrete de fatura</span>
+                  <span>Ativo</span>
+                </li>
+                <li>
+                  <span>Resumo semanal</span>
+                  <span>Ativo</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <nav class="mobile-nav" aria-label="Menu mobile">
+        <button class="nav-pill active" data-section="dashboard">Dash</button>
+        <button class="nav-pill" data-section="cartoes">Cartoes</button>
+        <button class="nav-pill" data-section="extrato">Extrato</button>
+        <button class="nav-pill" data-section="metas">Metas</button>
+        <button class="nav-pill" data-section="configuracoes">Perfil</button>
+      </nav>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
