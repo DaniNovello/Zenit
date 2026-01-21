@@ -26,20 +26,25 @@ export const Auth = () => {
           throw signInError;
         }
       } else {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        // CORREÇÃO AQUI: Passamos o nome nos metadados
+        // O Trigger do banco vai ler isso e criar o perfil automaticamente
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: name, // O SQL que criamos espera 'full_name'
+            },
+          },
         });
+
         if (signUpError) {
           throw signUpError;
         }
-        if (data.user) {
-          await supabase.from("profiles").insert({
-            id: data.user.id,
-            name,
-            email,
-          });
-        }
+
+        // REMOVIDO: O bloco de inserção manual em 'profiles' que causava erro
+        
+        alert("Cadastro realizado! Se o login não for automático, verifique seu e-mail.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao autenticar.");
@@ -57,7 +62,7 @@ export const Auth = () => {
           <p className="auth-subtitle">
             {mode === "login"
               ? "Acesse seu gestor financeiro."
-              : "Crie sua conta para comecar."}
+              : "Crie sua conta para começar."}
           </p>
         </div>
 
@@ -67,7 +72,7 @@ export const Auth = () => {
               <span>Nome</span>
               <input
                 type="text"
-                placeholder="Diego Novello"
+                placeholder="João Silva"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required
@@ -112,8 +117,8 @@ export const Auth = () => {
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
         >
           {mode === "login"
-            ? "Nao tem conta? Criar agora"
-            : "Ja tem conta? Fazer login"}
+            ? "Não tem conta? Criar agora"
+            : "Já tem conta? Fazer login"}
         </button>
       </div>
     </div>
