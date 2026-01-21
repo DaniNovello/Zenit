@@ -1,5 +1,6 @@
 import { Topbar } from "../components/Topbar";
 import { type ModalConfig } from "../app/types";
+import { alerts, creditCards, invoices } from "../app/mocks";
 
 type CartoesProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -48,24 +49,20 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
             </button>
           </div>
           <div className="credit-cards">
-            <article className="credit-card reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 1289</p>
-              <p className="credit-holder">Diego Novello</p>
-              <p className="credit-limit">Disponivel R$ 4.680</p>
-            </article>
-            <article className="credit-card alt reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 6420</p>
-              <p className="credit-holder">Fluxo Prime</p>
-              <p className="credit-limit">Disponivel R$ 7.200</p>
-            </article>
-            <article className="credit-card dark reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 2233</p>
-              <p className="credit-holder">Business</p>
-              <p className="credit-limit">Disponivel R$ 12.500</p>
-            </article>
+            {creditCards.map((card) => (
+              <article
+                key={card.id}
+                className={`credit-card ${card.style !== "default" ? card.style : ""} reveal`}
+              >
+                <div className="card-chip"></div>
+                <p className="credit-number">**** {card.lastDigits}</p>
+                <p className="credit-holder">{card.holder}</p>
+                <p className="credit-limit">
+                  Disponivel{" "}
+                  {card.availableLimit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
         <div className="panel">
@@ -86,18 +83,14 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
             </button>
           </div>
           <ul className="list">
-            <li>
-              <span>Fluxo Prime</span>
-              <span>R$ 1.240,00</span>
-            </li>
-            <li>
-              <span>Business</span>
-              <span>R$ 2.890,00</span>
-            </li>
-            <li>
-              <span>Cartao pessoal</span>
-              <span>R$ 890,00</span>
-            </li>
+            {invoices.map((invoice) => (
+              <li key={invoice.id}>
+                <span>{invoice.cardName}</span>
+                <span>
+                  {invoice.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="panel">
@@ -118,24 +111,20 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
               Ajustar
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Uso do limite</span>
-              <span>62%</span>
+          {alerts.map((alert) => (
+            <div className="goal" key={alert.id}>
+              <div className="goal-row">
+                <span>{alert.title}</span>
+                <span>{alert.value}</span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${alert.style === "soft" ? "soft" : ""}`}
+                  style={{ width: `${alert.progress}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "62%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Assinaturas</span>
-              <span>R$ 210</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "40%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </section>

@@ -14,10 +14,29 @@ import { type ModalConfig } from "./types";
 export const App = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+
+    const storedTheme = window.localStorage.getItem("theme");
+    if (storedTheme === "light" || storedTheme === "dark") {
+      return storedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
 
   useEffect(() => {
     document.body.classList.toggle("modal-open", Boolean(modalConfig));
   }, [modalConfig]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const openModal = (config: ModalConfig) => {
     setModalConfig(config);
@@ -58,6 +77,15 @@ export const App = () => {
 
         <MobileNav activeSection={activeSection} onSelect={setActiveSection} />
       </div>
+
+      <button
+        className="theme-toggle"
+        type="button"
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        aria-pressed={theme === "dark"}
+      >
+        {theme === "dark" ? "Modo claro" : "Modo escuro"}
+      </button>
 
       {modalConfig ? (
         <Modal config={modalConfig} onClose={() => setModalConfig(null)} />

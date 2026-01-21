@@ -6,7 +6,7 @@
 }
 
 body {
-  background: linear-gradient(180deg, #f5f7f9 0%, #e7ecef 100%);
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;

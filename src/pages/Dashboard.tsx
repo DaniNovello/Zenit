@@ -1,5 +1,6 @@
 import { Topbar } from "../components/Topbar";
 import { type ModalConfig } from "../app/types";
+import { bills, creditCards, goals, monthlyMetrics, transactions } from "../app/mocks";
 
 type DashboardProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -46,21 +47,15 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
       />
 
       <section className="cards">
-        <article className="glass-card reveal">
-          <p className="card-label">Entrada do mes</p>
-          <p className="card-value">R$ 18.250,00</p>
-          <p className="card-trend up">+12% vs ultimo mes</p>
-        </article>
-        <article className="glass-card reveal">
-          <p className="card-label">Saidas do mes</p>
-          <p className="card-value">R$ 7.940,00</p>
-          <p className="card-trend down">-6% vs ultimo mes</p>
-        </article>
-        <article className="glass-card reveal">
-          <p className="card-label">Economia</p>
-          <p className="card-value">R$ 3.500,00</p>
-          <p className="card-trend up">Meta 70%</p>
-        </article>
+        {monthlyMetrics.map((metric) => (
+          <article className="glass-card reveal" key={metric.id}>
+            <p className="card-label">{metric.label}</p>
+            <p className="card-value">
+              {metric.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+            </p>
+            <p className={`card-trend ${metric.trendDirection}`}>{metric.trend}</p>
+          </article>
+        ))}
       </section>
 
       <section className="grid">
@@ -82,24 +77,20 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
             </button>
           </div>
           <div className="credit-cards">
-            <article className="credit-card reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 1289</p>
-              <p className="credit-holder">Diego Novello</p>
-              <p className="credit-limit">Limite R$ 8.000</p>
-            </article>
-            <article className="credit-card alt reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 6420</p>
-              <p className="credit-holder">Fluxo Prime</p>
-              <p className="credit-limit">Limite R$ 12.000</p>
-            </article>
-            <article className="credit-card dark reveal">
-              <div className="card-chip"></div>
-              <p className="credit-number">**** 2233</p>
-              <p className="credit-holder">Business</p>
-              <p className="credit-limit">Limite R$ 20.000</p>
-            </article>
+            {creditCards.map((card) => (
+              <article
+                key={card.id}
+                className={`credit-card ${card.style !== "default" ? card.style : ""} reveal`}
+              >
+                <div className="card-chip"></div>
+                <p className="credit-number">**** {card.lastDigits}</p>
+                <p className="credit-holder">{card.holder}</p>
+                <p className="credit-limit">
+                  Limite{" "}
+                  {card.availableLimit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
 
@@ -121,22 +112,14 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
             </button>
           </div>
           <ul className="list">
-            <li>
-              <span>Fatura Cartao Fluxo</span>
-              <span>R$ 1.240,00</span>
-            </li>
-            <li>
-              <span>Academia</span>
-              <span>R$ 149,00</span>
-            </li>
-            <li>
-              <span>Assinaturas</span>
-              <span>R$ 89,90</span>
-            </li>
-            <li>
-              <span>Internet</span>
-              <span>R$ 119,90</span>
-            </li>
+            {bills.map((bill) => (
+              <li key={bill.id}>
+                <span>{bill.title}</span>
+                <span>
+                  {bill.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -158,34 +141,23 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
             </button>
           </div>
           <div className="statement">
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Mercado Central</p>
-                <p className="statement-sub">Cartao - Hoje</p>
+            {transactions.slice(0, 4).map((transaction) => (
+              <div className="statement-row" key={transaction.id}>
+                <div>
+                  <p className="statement-title">{transaction.title}</p>
+                  <p className="statement-sub">
+                    {transaction.category} - {transaction.date}
+                  </p>
+                </div>
+                <span className={`statement-amount ${transaction.amount > 0 ? "up" : "down"}`}>
+                  {transaction.amount > 0 ? "+ " : "- "}
+                  {Math.abs(transaction.amount).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </span>
               </div>
-              <span className="statement-amount down">- R$ 320,40</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Salario</p>
-                <p className="statement-sub">Entrada - Ontem</p>
-              </div>
-              <span className="statement-amount up">+ R$ 4.200,00</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Delivery</p>
-                <p className="statement-sub">Pix - 2 dias</p>
-              </div>
-              <span className="statement-amount down">- R$ 74,90</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Freelance</p>
-                <p className="statement-sub">Entrada - 3 dias</p>
-              </div>
-              <span className="statement-amount up">+ R$ 980,00</span>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -207,33 +179,23 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
               Editar
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Reserva</span>
-              <span>R$ 7.000 / 10.000</span>
+          {goals.map((goal) => (
+            <div className="goal" key={goal.id}>
+              <div className="goal-row">
+                <span>{goal.title}</span>
+                <span>
+                  R$ {goal.currentAmount.toLocaleString("pt-BR")} /{" "}
+                  {goal.targetAmount.toLocaleString("pt-BR")}
+                </span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${goal.style && goal.style !== "default" ? goal.style : ""}`}
+                  style={{ width: `${goal.progress}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "70%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Viagem</span>
-              <span>R$ 2.100 / 4.000</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar alt" style={{ width: "52%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Novo notebook</span>
-              <span>R$ 1.500 / 6.000</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "25%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </section>

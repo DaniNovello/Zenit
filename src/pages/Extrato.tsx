@@ -1,5 +1,6 @@
 import { Topbar } from "../components/Topbar";
 import { type ModalConfig } from "../app/types";
+import { extratoSummary, transactions } from "../app/mocks";
 
 type ExtratoProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -64,41 +65,23 @@ export const Extrato = ({ onOpenModal }: ExtratoProps) => {
             </button>
           </div>
           <div className="statement">
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Mercado Central</p>
-                <p className="statement-sub">Cartao - Hoje</p>
+            {transactions.map((transaction) => (
+              <div className="statement-row" key={transaction.id}>
+                <div>
+                  <p className="statement-title">{transaction.title}</p>
+                  <p className="statement-sub">
+                    {transaction.category} - {transaction.date}
+                  </p>
+                </div>
+                <span className={`statement-amount ${transaction.amount > 0 ? "up" : "down"}`}>
+                  {transaction.amount > 0 ? "+ " : "- "}
+                  {Math.abs(transaction.amount).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </span>
               </div>
-              <span className="statement-amount down">- R$ 320,40</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Salario</p>
-                <p className="statement-sub">Entrada - Ontem</p>
-              </div>
-              <span className="statement-amount up">+ R$ 4.200,00</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Restaurante</p>
-                <p className="statement-sub">Pix - 2 dias</p>
-              </div>
-              <span className="statement-amount down">- R$ 210,00</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Freelance</p>
-                <p className="statement-sub">Entrada - 3 dias</p>
-              </div>
-              <span className="statement-amount up">+ R$ 980,00</span>
-            </div>
-            <div className="statement-row">
-              <div>
-                <p className="statement-title">Uber</p>
-                <p className="statement-sub">Cartao - 4 dias</p>
-              </div>
-              <span className="statement-amount down">- R$ 38,90</span>
-            </div>
+            ))}
           </div>
         </div>
         <div className="panel">
@@ -118,33 +101,20 @@ export const Extrato = ({ onOpenModal }: ExtratoProps) => {
               Mes
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Entradas</span>
-              <span>R$ 12.880</span>
+          {extratoSummary.map((item) => (
+            <div className="goal" key={item.id}>
+              <div className="goal-row">
+                <span>{item.title}</span>
+                <span>{item.value}</span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${item.style === "alt" ? "alt" : item.style === "soft" ? "soft" : ""}`}
+                  style={{ width: `${item.progress}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "82%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Saidas</span>
-              <span>R$ 7.200</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar alt" style={{ width: "58%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Economia</span>
-              <span>R$ 5.680</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "64%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </section>

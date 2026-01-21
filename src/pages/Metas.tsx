@@ -1,5 +1,6 @@
 import { Topbar } from "../components/Topbar";
 import { type ModalConfig } from "../app/types";
+import { goals, plannedExpenses } from "../app/mocks";
 
 type MetasProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -47,33 +48,23 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
               Prioridades
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Reserva de emergencia</span>
-              <span>R$ 7.000 / 10.000</span>
+          {goals.map((goal) => (
+            <div className="goal" key={goal.id}>
+              <div className="goal-row">
+                <span>{goal.title}</span>
+                <span>
+                  R$ {goal.currentAmount.toLocaleString("pt-BR")} /{" "}
+                  {goal.targetAmount.toLocaleString("pt-BR")}
+                </span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${goal.style && goal.style !== "default" ? goal.style : ""}`}
+                  style={{ width: `${goal.progress}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "70%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Viagem internacional</span>
-              <span>R$ 2.100 / 4.000</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar alt" style={{ width: "52%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Novo notebook</span>
-              <span>R$ 1.500 / 6.000</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "25%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
         <div className="panel">
           <div className="panel-header">
@@ -94,18 +85,14 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
             </button>
           </div>
           <ul className="list">
-            <li>
-              <span>Casa propria</span>
-              <span>R$ 1.200 / mes</span>
-            </li>
-            <li>
-              <span>Carro</span>
-              <span>R$ 900 / mes</span>
-            </li>
-            <li>
-              <span>Curso</span>
-              <span>R$ 350 / mes</span>
-            </li>
+            {plannedExpenses.map((item) => (
+              <li key={item.id}>
+                <span>{item.title}</span>
+                <span>
+                  R$ {item.amount.toLocaleString("pt-BR")} / {item.frequency}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
