@@ -1,16 +1,51 @@
+import { useEffect, useState } from "react";
 import { Topbar } from "../components/Topbar";
-import { type ModalConfig } from "../app/types";
-import { bills, creditCards, goals, monthlyMetrics, transactions } from "../app/mocks";
+import { type Goal, type ModalConfig, type Transaction } from "../app/types";
+import { createTransaction, fetchGoals, fetchTransactions } from "../services/db";
 
 type DashboardProps = {
   onOpenModal: (config: ModalConfig) => void;
 };
 
 export const Dashboard = ({ onOpenModal }: DashboardProps) => {
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const totalIncome = transactions
+    .filter((transaction) => transaction.type === "income")
+    .reduce((acc, transaction) => acc + transaction.amount, 0);
+
+  const totalExpense = transactions
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((acc, transaction) => acc + Math.abs(transaction.amount), 0);
+
+  const balance = totalIncome - totalExpense;
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [goalsData, transactionsData] = await Promise.all([
+        fetchGoals(),
+        fetchTransactions(),
+      ]);
+      setGoals(goalsData);
+      setTransactions(transactionsData);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   return (
     <section className="screen">
       <Topbar
-        eyebrow="Bem-vindo, Diego"
+        eyebrow="Bem-vindo, Daniel"
         title="Visao geral"
         actions={
           <>
@@ -23,6 +58,60 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
                   description: "Registre uma nova entrada ou saida.",
                   mode: "form",
                   actionLabel: "Adicionar",
+                  fields: [
+                    {
+                      name: "description",
+                      label: "Descricao",
+                      type: "text",
+                      placeholder: "Ex: Mercado Central",
+                      required: true,
+                    },
+                    {
+                      name: "subtitle",
+                      label: "Subtitulo",
+                      type: "text",
+                      placeholder: "Ex: Cartao - Hoje",
+                    },
+                    {
+                      name: "amount",
+                      label: "Valor",
+                      type: "number",
+                      placeholder: "0.00",
+                      required: true,
+                    },
+                    {
+                      name: "type",
+                      label: "Tipo",
+                      type: "select",
+                      options: [
+                        { label: "Entrada", value: "income" },
+                        { label: "Saida", value: "expense" },
+                      ],
+                      required: true,
+                    },
+                    {
+                      name: "category",
+                      label: "Categoria",
+                      type: "text",
+                      placeholder: "Alimentacao",
+                    },
+                    {
+                      name: "created_at",
+                      label: "Data",
+                      type: "date",
+                    },
+                  ],
+                  onSubmit: async (values) => {
+                    await createTransaction({
+                      description: values.description,
+                      subtitle: values.subtitle,
+                      amount: Number(values.amount),
+                      type: values.type === "income" ? "income" : "expense",
+                      category: values.category,
+                      created_at: values.created_at || undefined,
+                    });
+                    await loadData();
+                  },
                 })
               }
             >
@@ -47,118 +136,58 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
       />
 
       <section className="cards">
-        {monthlyMetrics.map((metric) => (
-          <article className="glass-card reveal" key={metric.id}>
-            <p className="card-label">{metric.label}</p>
-            <p className="card-value">
-              {metric.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-            </p>
-            <p className={`card-trend ${metric.trendDirection}`}>{metric.trend}</p>
-          </article>
-        ))}
+        <article className="glass-card reveal">
+          <p className="card-label">Entrada do mes</p>
+          <p className="card-value">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(totalIncome)}
+          </p>
+          <p className="card-trend up">Calculado via API</p>
+        </article>
+        <article className="glass-card reveal">
+          <p className="card-label">Saidas do mes</p>
+          <p className="card-value">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(totalExpense)}
+          </p>
+          <p className="card-trend down">Calculado via API</p>
+        </article>
+        <article className="glass-card reveal">
+          <p className="card-label">Economia</p>
+          <p className="card-value">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(balance)}
+          </p>
+          <p className="card-trend up">Saldo Atual</p>
+        </article>
       </section>
 
       <section className="grid">
         <div className="panel wide">
           <div className="panel-header">
             <h2>Cartoes de credito</h2>
-            <button
-              className="ghost"
-              type="button"
-              onClick={() =>
-                onOpenModal({
-                  title: "Gerenciar cartoes",
-                  description: "Visualize limites e configuracoes.",
-                  mode: "view",
-                })
-              }
-            >
-              Gerenciar
-            </button>
           </div>
-          <div className="credit-cards">
-            {creditCards.map((card) => (
-              <article
-                key={card.id}
-                className={`credit-card ${card.style !== "default" ? card.style : ""} reveal`}
-              >
-                <div className="card-chip"></div>
-                <p className="credit-number">**** {card.lastDigits}</p>
-                <p className="credit-holder">{card.holder}</p>
-                <p className="credit-limit">
-                  Limite{" "}
-                  {card.availableLimit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </p>
-              </article>
-            ))}
-          </div>
+          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
         </div>
 
         <div className="panel">
           <div className="panel-header">
             <h2>Proximos pagamentos</h2>
-            <button
-              className="ghost"
-              type="button"
-              onClick={() =>
-                onOpenModal({
-                  title: "Todos os pagamentos",
-                  description: "Lista completa dos compromissos do mes.",
-                  mode: "view",
-                })
-              }
-            >
-              Ver todos
-            </button>
           </div>
-          <ul className="list">
-            {bills.map((bill) => (
-              <li key={bill.id}>
-                <span>{bill.title}</span>
-                <span>
-                  {bill.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
         </div>
 
         <div className="panel wide">
           <div className="panel-header">
             <h2>Extrato</h2>
-            <button
-              className="ghost"
-              type="button"
-              onClick={() =>
-                onOpenModal({
-                  title: "Baixar extrato",
-                  description: "Escolha o periodo para exportacao.",
-                  mode: "view",
-                })
-              }
-            >
-              Baixar
-            </button>
           </div>
-          <div className="statement">
-            {transactions.slice(0, 4).map((transaction) => (
-              <div className="statement-row" key={transaction.id}>
-                <div>
-                  <p className="statement-title">{transaction.title}</p>
-                  <p className="statement-sub">
-                    {transaction.category} - {transaction.date}
-                  </p>
-                </div>
-                <span className={`statement-amount ${transaction.amount > 0 ? "up" : "down"}`}>
-                  {transaction.amount > 0 ? "+ " : "- "}
-                  {Math.abs(transaction.amount).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </span>
-              </div>
-            ))}
-          </div>
+          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
         </div>
 
         <div className="panel">
@@ -169,33 +198,52 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
               type="button"
               onClick={() =>
                 onOpenModal({
-                  title: "Editar metas",
-                  description: "Atualize valores e prazos.",
-                  mode: "form",
-                  actionLabel: "Salvar metas",
+                  title: "Metas cadastradas",
+                  description: "Resumo das metas atuais.",
+                  mode: "view",
+                  content: (
+                    <ul className="modal-list">
+                      {goals.map((goal) => (
+                        <li key={goal.id}>
+                          {goal.title} - R$ {goal.currentAmount} /{" "}
+                          {goal.targetAmount}
+                        </li>
+                      ))}
+                    </ul>
+                  ),
                 })
               }
             >
               Editar
             </button>
           </div>
-          {goals.map((goal) => (
-            <div className="goal" key={goal.id}>
-              <div className="goal-row">
-                <span>{goal.title}</span>
-                <span>
-                  R$ {goal.currentAmount.toLocaleString("pt-BR")} /{" "}
-                  {goal.targetAmount.toLocaleString("pt-BR")}
-                </span>
+
+          {loading ? (
+            <p style={{ padding: 20 }}>Carregando metas...</p>
+          ) : (
+            goals.map((goal) => (
+              <div className="goal" key={goal.id}>
+                <div className="goal-row">
+                  <span>{goal.title}</span>
+                  <span>
+                    R$ {goal.currentAmount} / {goal.targetAmount}
+                  </span>
+                </div>
+                <div className="progress">
+                  <div
+                    className="progress-bar"
+                    style={{ width: `${goal.progress}%` }}
+                  ></div>
+                </div>
               </div>
-              <div className="progress">
-                <div
-                  className={`progress-bar ${goal.style && goal.style !== "default" ? goal.style : ""}`}
-                  style={{ width: `${goal.progress}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
+
+          {!loading && goals.length === 0 && (
+            <p style={{ padding: 20, color: "#888" }}>
+              Nenhuma meta cadastrada.
+            </p>
+          )}
         </div>
       </section>
     </section>

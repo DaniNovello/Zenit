@@ -21,6 +21,27 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
                 description: "Registre um novo investimento.",
                 mode: "form",
                 actionLabel: "Adicionar aporte",
+                fields: [
+                  {
+                    name: "descricao",
+                    label: "Descricao",
+                    type: "text",
+                    placeholder: "Aporte mensal",
+                    required: true,
+                  },
+                  {
+                    name: "valor",
+                    label: "Valor",
+                    type: "number",
+                    placeholder: "1000",
+                    required: true,
+                  },
+                  {
+                    name: "data",
+                    label: "Data",
+                    type: "date",
+                  },
+                ],
               })
             }
           >
@@ -41,6 +62,13 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
                   title: "Comparar carteira",
                   description: "Comparativo entre periodos.",
                   mode: "view",
+                  content: (
+                    <ul className="modal-list">
+                      <li>Ultimos 6 meses: +7,4%</li>
+                      <li>Ultimos 12 meses: +14,2%</li>
+                      <li>Ultimos 24 meses: +22,9%</li>
+                    </ul>
+                  ),
                 })
               }
             >
@@ -86,6 +114,13 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
                   title: "Periodo da rentabilidade",
                   description: "Selecione o intervalo desejado.",
                   mode: "view",
+                  content: (
+                    <ul className="modal-list">
+                      <li>30 dias</li>
+                      <li>6 meses</li>
+                      <li>12 meses</li>
+                    </ul>
+                  ),
                 })
               }
             >

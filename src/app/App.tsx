@@ -3,17 +3,21 @@ import { MobileNav } from "../components/MobileNav";
 import { Modal } from "../components/Modal";
 import { Sidebar } from "../components/Sidebar";
 import { NAV_ITEMS, type SectionId } from "../data/navigation";
+import { Auth } from "../pages/Auth";
 import { Cartoes } from "../pages/Cartoes";
 import { Configuracoes } from "../pages/Configuracoes";
 import { Dashboard } from "../pages/Dashboard";
 import { Extrato } from "../pages/Extrato";
 import { Investimentos } from "../pages/Investimentos";
 import { Metas } from "../pages/Metas";
+import { supabase } from "../services/supabase";
 import { type ModalConfig } from "./types";
+import { type Session } from "@supabase/supabase-js";
 
 export const App = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") {
       return "light";
@@ -38,6 +42,20 @@ export const App = () => {
     window.localStorage.setItem("theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, nextSession) => {
+        setSession(nextSession);
+      },
+    );
+    return () => {
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
   const openModal = (config: ModalConfig) => {
     setModalConfig(config);
   };
@@ -59,6 +77,29 @@ export const App = () => {
         return <Dashboard onOpenModal={openModal} />;
     }
   }, [activeSection, openModal]);
+
+  if (!session) {
+    return (
+      <div className="app-shell">
+        <div className="ambient">
+          <div className="orb orb-1"></div>
+          <div className="orb orb-2"></div>
+          <div className="orb orb-3"></div>
+        </div>
+
+        <Auth />
+
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-pressed={theme === "dark"}
+        >
+          {theme === "dark" ? "Modo claro" : "Modo escuro"}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">

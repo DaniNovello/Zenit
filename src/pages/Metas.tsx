@@ -1,12 +1,28 @@
+import { useEffect, useState } from "react";
 import { Topbar } from "../components/Topbar";
-import { type ModalConfig } from "../app/types";
-import { goals, plannedExpenses } from "../app/mocks";
+import { type Goal, type ModalConfig } from "../app/types";
+import { createGoal, fetchGoals } from "../services/db";
 
 type MetasProps = {
   onOpenModal: (config: ModalConfig) => void;
 };
 
 export const Metas = ({ onOpenModal }: MetasProps) => {
+  const [goals, setGoals] = useState<Goal[]>([]);
+
+  const loadGoals = async () => {
+    try {
+      const goalsData = await fetchGoals();
+      setGoals(goalsData);
+    } catch (error) {
+      console.error("Erro ao buscar metas:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadGoals();
+  }, []);
+
   return (
     <section className="screen">
       <Topbar
@@ -22,6 +38,37 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
                 description: "Defina um objetivo financeiro.",
                 mode: "form",
                 actionLabel: "Criar meta",
+                fields: [
+                  {
+                    name: "title",
+                    label: "Titulo",
+                    type: "text",
+                    placeholder: "Reserva",
+                    required: true,
+                  },
+                  {
+                    name: "target_amount",
+                    label: "Valor da meta",
+                    type: "number",
+                    placeholder: "10000",
+                    required: true,
+                  },
+                  {
+                    name: "current_amount",
+                    label: "Valor atual",
+                    type: "number",
+                    placeholder: "0",
+                    required: true,
+                  },
+                ],
+                onSubmit: async (values) => {
+                  await createGoal({
+                    title: values.title,
+                    target_amount: Number(values.target_amount),
+                    current_amount: Number(values.current_amount),
+                  });
+                  await loadGoals();
+                },
               })
             }
           >
@@ -42,6 +89,13 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
                   title: "Prioridades",
                   description: "Reordene metas e pesos.",
                   mode: "view",
+                  content: (
+                    <ul className="modal-list">
+                      {goals.map((goal) => (
+                        <li key={goal.id}>{goal.title}</li>
+                      ))}
+                    </ul>
+                  ),
                 })
               }
             >
@@ -78,6 +132,26 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
                   description: "Atualize valores planejados.",
                   mode: "form",
                   actionLabel: "Salvar planejamento",
+                  fields: [
+                    {
+                      name: "casa",
+                      label: "Casa propria (mes)",
+                      type: "number",
+                      placeholder: "1200",
+                    },
+                    {
+                      name: "carro",
+                      label: "Carro (mes)",
+                      type: "number",
+                      placeholder: "900",
+                    },
+                    {
+                      name: "curso",
+                      label: "Curso (mes)",
+                      type: "number",
+                      placeholder: "350",
+                    },
+                  ],
                 })
               }
             >
@@ -85,14 +159,18 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
             </button>
           </div>
           <ul className="list">
-            {plannedExpenses.map((item) => (
-              <li key={item.id}>
-                <span>{item.title}</span>
-                <span>
-                  R$ {item.amount.toLocaleString("pt-BR")} / {item.frequency}
-                </span>
-              </li>
-            ))}
+            <li>
+              <span>Casa propria</span>
+              <span>R$ 1.200 / mes</span>
+            </li>
+            <li>
+              <span>Carro</span>
+              <span>R$ 900 / mes</span>
+            </li>
+            <li>
+              <span>Curso</span>
+              <span>R$ 350 / mes</span>
+            </li>
           </ul>
         </div>
       </section>
