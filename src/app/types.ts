@@ -16,6 +16,7 @@ export type ModalConfig = {
   initialValues?: Record<string, string>;
   content?: ReactNode;
   onSubmit?: (values: Record<string, string>) => Promise<void>;
+  onSuccess?: () => void;
 };
 
 export interface Transaction {

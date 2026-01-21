@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Topbar } from "../components/Topbar";
 import { type Goal, type ModalConfig, type Transaction } from "../app/types";
-import { createTransaction, fetchGoals, fetchTransactions } from "../services/db";
+import {
+  createTransaction,
+  fetchCreditCards,
+  fetchGoals,
+  fetchTransactions,
+} from "../services/db";
+import { type CreditCard } from "../app/types";
 
 type DashboardProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -10,6 +16,7 @@ type DashboardProps = {
 export const Dashboard = ({ onOpenModal }: DashboardProps) => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [cards, setCards] = useState<CreditCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   const totalIncome = transactions
@@ -25,12 +32,14 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [goalsData, transactionsData] = await Promise.all([
+      const [goalsData, transactionsData, cardsData] = await Promise.all([
         fetchGoals(),
         fetchTransactions(),
+        fetchCreditCards(),
       ]);
       setGoals(goalsData);
       setTransactions(transactionsData);
+      setCards(cardsData);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -110,7 +119,9 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
                       category: values.category,
                       created_at: values.created_at || undefined,
                     });
-                    await loadData();
+                  },
+                  onSuccess: () => {
+                    void loadData();
                   },
                 })
               }
@@ -173,21 +184,79 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
           <div className="panel-header">
             <h2>Cartoes de credito</h2>
           </div>
-          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
+          <div className="credit-cards">
+            {cards.map((card) => (
+              <article
+                key={card.id}
+                className={`credit-card ${card.style !== "default" ? card.style : ""}`}
+              >
+                <div className="card-chip"></div>
+                <p className="credit-number">**** {card.lastDigits}</p>
+                <p className="credit-holder">{card.holderName}</p>
+                <p className="credit-limit">
+                  Disponivel{" "}
+                  {card.availableAmount.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
 
         <div className="panel">
           <div className="panel-header">
             <h2>Proximos pagamentos</h2>
           </div>
-          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
+          <ul className="list">
+            {transactions
+              .filter((transaction) => transaction.type === "expense")
+              .slice(0, 4)
+              .map((transaction) => (
+                <li key={transaction.id}>
+                  <span>{transaction.description}</span>
+                  <span>
+                    {Math.abs(transaction.amount).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </span>
+                </li>
+              ))}
+          </ul>
         </div>
 
         <div className="panel wide">
           <div className="panel-header">
             <h2>Extrato</h2>
           </div>
-          <p style={{ padding: 20, color: "#888" }}>Em breve conectado...</p>
+          <div className="statement">
+            {transactions.slice(0, 4).map((transaction) => (
+              <div className="statement-row" key={transaction.id}>
+                <div>
+                  <p className="statement-title">{transaction.description}</p>
+                  <p className="statement-sub">
+                    {transaction.subtitle ??
+                      `${transaction.category ?? "Outro"} - ${new Date(
+                        transaction.createdAt,
+                      ).toLocaleDateString("pt-BR")}`}
+                  </p>
+                </div>
+                <span
+                  className={`statement-amount ${
+                    transaction.amount > 0 ? "up" : "down"
+                  }`}
+                >
+                  {transaction.amount > 0 ? "+ " : "- "}
+                  {Math.abs(transaction.amount).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="panel">
@@ -239,11 +308,11 @@ export const Dashboard = ({ onOpenModal }: DashboardProps) => {
             ))
           )}
 
-          {!loading && goals.length === 0 && (
+          {!loading && goals.length === 0 ? (
             <p style={{ padding: 20, color: "#888" }}>
               Nenhuma meta cadastrada.
             </p>
-          )}
+          ) : null}
         </div>
       </section>
     </section>

@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { Topbar } from "../components/Topbar";
-import { type Goal, type ModalConfig } from "../app/types";
-import { createGoal, fetchGoals } from "../services/db";
+import { type Goal, type ModalConfig, type PlannedExpense } from "../app/types";
+import {
+  createGoal,
+  createPlannedExpense,
+  deleteGoal,
+  deletePlannedExpense,
+  fetchGoals,
+  fetchPlannedExpenses,
+  updateGoal,
+  updatePlannedExpense,
+} from "../services/db";
 
 type MetasProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -9,6 +18,7 @@ type MetasProps = {
 
 export const Metas = ({ onOpenModal }: MetasProps) => {
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [planned, setPlanned] = useState<PlannedExpense[]>([]);
 
   const loadGoals = async () => {
     try {
@@ -19,8 +29,18 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
     }
   };
 
+  const loadPlanned = async () => {
+    try {
+      const plannedData = await fetchPlannedExpenses();
+      setPlanned(plannedData);
+    } catch (error) {
+      console.error("Erro ao buscar planejamento:", error);
+    }
+  };
+
   useEffect(() => {
     loadGoals();
+    loadPlanned();
   }, []);
 
   return (
@@ -67,7 +87,9 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
                     target_amount: Number(values.target_amount),
                     current_amount: Number(values.current_amount),
                   });
-                  await loadGoals();
+                },
+                onSuccess: () => {
+                  void loadGoals();
                 },
               })
             }
@@ -117,6 +139,78 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
                   style={{ width: `${goal.progress}%` }}
                 ></div>
               </div>
+              <div className="goal-actions">
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Editar meta",
+                      description: "Atualize os valores da meta.",
+                      mode: "form",
+                      actionLabel: "Salvar",
+                      fields: [
+                        {
+                          name: "title",
+                          label: "Titulo",
+                          type: "text",
+                          required: true,
+                        },
+                        {
+                          name: "target_amount",
+                          label: "Valor da meta",
+                          type: "number",
+                          required: true,
+                        },
+                        {
+                          name: "current_amount",
+                          label: "Valor atual",
+                          type: "number",
+                          required: true,
+                        },
+                      ],
+                      initialValues: {
+                        title: goal.title,
+                        target_amount: String(goal.targetAmount),
+                        current_amount: String(goal.currentAmount),
+                      },
+                      onSubmit: async (values) => {
+                        await updateGoal({
+                          id: goal.id,
+                          title: values.title,
+                          target_amount: Number(values.target_amount),
+                          current_amount: Number(values.current_amount),
+                        });
+                      },
+                      onSuccess: () => {
+                        void loadGoals();
+                      },
+                    })
+                  }
+                >
+                  Editar
+                </button>
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Excluir meta",
+                      description: "Confirme a exclusao desta meta.",
+                      mode: "form",
+                      actionLabel: "Excluir",
+                      onSubmit: async () => {
+                        await deleteGoal(goal.id);
+                      },
+                      onSuccess: () => {
+                        void loadGoals();
+                      },
+                    })
+                  }
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -128,30 +222,42 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
               type="button"
               onClick={() =>
                 onOpenModal({
-                  title: "Editar planejamento",
-                  description: "Atualize valores planejados.",
+                  title: "Adicionar planejamento",
+                  description: "Inclua um novo item planejado.",
                   mode: "form",
-                  actionLabel: "Salvar planejamento",
+                  actionLabel: "Salvar",
                   fields: [
                     {
-                      name: "casa",
-                      label: "Casa propria (mes)",
+                      name: "title",
+                      label: "Descricao",
+                      type: "text",
+                      placeholder: "Casa propria",
+                      required: true,
+                    },
+                    {
+                      name: "amount",
+                      label: "Valor (mes)",
                       type: "number",
                       placeholder: "1200",
+                      required: true,
                     },
                     {
-                      name: "carro",
-                      label: "Carro (mes)",
-                      type: "number",
-                      placeholder: "900",
-                    },
-                    {
-                      name: "curso",
-                      label: "Curso (mes)",
-                      type: "number",
-                      placeholder: "350",
+                      name: "frequency",
+                      label: "Frequencia",
+                      type: "text",
+                      placeholder: "mes",
                     },
                   ],
+                  onSubmit: async (values) => {
+                    await createPlannedExpense({
+                      title: values.title,
+                      amount: Number(values.amount),
+                      frequency: values.frequency || "mes",
+                    });
+                  },
+                  onSuccess: () => {
+                    void loadPlanned();
+                  },
                 })
               }
             >
@@ -159,19 +265,90 @@ export const Metas = ({ onOpenModal }: MetasProps) => {
             </button>
           </div>
           <ul className="list">
-            <li>
-              <span>Casa propria</span>
-              <span>R$ 1.200 / mes</span>
-            </li>
-            <li>
-              <span>Carro</span>
-              <span>R$ 900 / mes</span>
-            </li>
-            <li>
-              <span>Curso</span>
-              <span>R$ 350 / mes</span>
-            </li>
+            {planned.map((item) => (
+              <li key={item.id}>
+                <span>{item.title}</span>
+                <span>
+                  R$ {item.amount.toLocaleString("pt-BR")} / {item.frequency}
+                </span>
+              </li>
+            ))}
           </ul>
+          <div className="goal-actions">
+            {planned.map((item) => (
+              <div className="inline-actions" key={`${item.id}-actions`}>
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Editar planejamento",
+                      description: "Atualize o item planejado.",
+                      mode: "form",
+                      actionLabel: "Salvar",
+                      fields: [
+                        {
+                          name: "title",
+                          label: "Descricao",
+                          type: "text",
+                          required: true,
+                        },
+                        {
+                          name: "amount",
+                          label: "Valor (mes)",
+                          type: "number",
+                          required: true,
+                        },
+                        {
+                          name: "frequency",
+                          label: "Frequencia",
+                          type: "text",
+                        },
+                      ],
+                      initialValues: {
+                        title: item.title,
+                        amount: String(item.amount),
+                        frequency: item.frequency,
+                      },
+                      onSubmit: async (values) => {
+                        await updatePlannedExpense({
+                          id: item.id,
+                          title: values.title,
+                          amount: Number(values.amount),
+                          frequency: values.frequency || "mes",
+                        });
+                      },
+                      onSuccess: () => {
+                        void loadPlanned();
+                      },
+                    })
+                  }
+                >
+                  Editar {item.title}
+                </button>
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Excluir planejamento",
+                      description: "Confirme a exclusao deste item.",
+                      mode: "form",
+                      actionLabel: "Excluir",
+                      onSubmit: async () => {
+                        await deletePlannedExpense(item.id);
+                      },
+                      onSuccess: () => {
+                        void loadPlanned();
+                      },
+                    })
+                  }
+                >
+                  Excluir {item.title}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </section>

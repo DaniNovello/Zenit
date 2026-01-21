@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Topbar } from "../components/Topbar";
 import { type CreditCard, type ModalConfig, type Transaction } from "../app/types";
-import { createCreditCard, fetchCreditCards, fetchTransactions } from "../services/db";
+import {
+  createCreditCard,
+  deleteCreditCard,
+  fetchAlertSettings,
+  fetchCreditCards,
+  fetchTransactions,
+  updateCreditCard,
+  upsertAlertSettings,
+} from "../services/db";
 
 type CartoesProps = {
   onOpenModal: (config: ModalConfig) => void;
@@ -10,15 +18,21 @@ type CartoesProps = {
 export const Cartoes = ({ onOpenModal }: CartoesProps) => {
   const [cards, setCards] = useState<CreditCard[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [alertSettings, setAlertSettings] = useState({
+    limitPercent: 70,
+    subscriptionsBudget: 210,
+  });
 
   const loadData = async () => {
     try {
-      const [cardsData, transactionsData] = await Promise.all([
+      const [cardsData, transactionsData, alertData] = await Promise.all([
         fetchCreditCards(),
         fetchTransactions(),
+        fetchAlertSettings(),
       ]);
       setCards(cardsData);
       setTransactions(transactionsData);
+      setAlertSettings(alertData);
     } catch (error) {
       console.error("Erro ao buscar cartoes:", error);
     }
@@ -32,6 +46,24 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
     return transactions
       .filter((transaction) => transaction.type === "expense")
       .slice(0, 3);
+  }, [transactions]);
+
+  const usedLimitPercent = useMemo(() => {
+    const totalLimit = cards.reduce((acc, card) => acc + card.limitAmount, 0);
+    const totalAvailable = cards.reduce(
+      (acc, card) => acc + card.availableAmount,
+      0,
+    );
+    if (!totalLimit) return 0;
+    return Math.round(((totalLimit - totalAvailable) / totalLimit) * 100);
+  }, [cards]);
+
+  const subscriptionsTotal = useMemo(() => {
+    return transactions
+      .filter((transaction) =>
+        (transaction.category ?? "").toLowerCase().includes("assin"),
+      )
+      .reduce((acc, transaction) => acc + Math.abs(transaction.amount), 0);
   }, [transactions]);
 
   return (
@@ -105,7 +137,9 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
                     available_amount: Number(values.available_amount),
                     style: values.style as "default" | "alt" | "dark",
                   });
-                  await loadData();
+                },
+                onSuccess: () => {
+                  void loadData();
                 },
               })
             }
@@ -162,6 +196,106 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
                     currency: "BRL",
                   })}
                 </p>
+                <div className="card-actions">
+                  <button
+                    className="ghost"
+                    type="button"
+                    onClick={() =>
+                      onOpenModal({
+                        title: "Editar cartao",
+                        description: "Atualize os dados do cartao.",
+                        mode: "form",
+                        actionLabel: "Salvar",
+                        fields: [
+                          {
+                            name: "name",
+                            label: "Nome",
+                            type: "text",
+                            required: true,
+                          },
+                          {
+                            name: "holder_name",
+                            label: "Titular",
+                            type: "text",
+                            required: true,
+                          },
+                          {
+                            name: "last_digits",
+                            label: "Ultimos digitos",
+                            type: "text",
+                            required: true,
+                          },
+                          {
+                            name: "limit_amount",
+                            label: "Limite total",
+                            type: "number",
+                            required: true,
+                          },
+                          {
+                            name: "available_amount",
+                            label: "Limite disponivel",
+                            type: "number",
+                            required: true,
+                          },
+                          {
+                            name: "style",
+                            label: "Estilo",
+                            type: "select",
+                            options: [
+                              { label: "Padrao", value: "default" },
+                              { label: "Dourado", value: "alt" },
+                              { label: "Escuro", value: "dark" },
+                            ],
+                          },
+                        ],
+                        initialValues: {
+                          name: card.name,
+                          holder_name: card.holderName,
+                          last_digits: card.lastDigits,
+                          limit_amount: String(card.limitAmount),
+                          available_amount: String(card.availableAmount),
+                          style: card.style,
+                        },
+                        onSubmit: async (values) => {
+                          await updateCreditCard({
+                            id: card.id,
+                            name: values.name,
+                            holder_name: values.holder_name,
+                            last_digits: values.last_digits,
+                            limit_amount: Number(values.limit_amount),
+                            available_amount: Number(values.available_amount),
+                            style: values.style as "default" | "alt" | "dark",
+                          });
+                        },
+                        onSuccess: () => {
+                          void loadData();
+                        },
+                      })
+                    }
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="ghost"
+                    type="button"
+                    onClick={() =>
+                      onOpenModal({
+                        title: "Excluir cartao",
+                        description: "Confirme a exclusao deste cartao.",
+                        mode: "form",
+                        actionLabel: "Excluir",
+                        onSubmit: async () => {
+                          await deleteCreditCard(card.id);
+                        },
+                        onSuccess: () => {
+                          void loadData();
+                        },
+                      })
+                    }
+                  >
+                    Excluir
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -236,6 +370,18 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
                       placeholder: "210",
                     },
                   ],
+                  initialValues: {
+                    limite: String(alertSettings.limitPercent),
+                    assinaturas: String(alertSettings.subscriptionsBudget),
+                  },
+                  onSubmit: async (values) => {
+                    const updated = {
+                      limitPercent: Number(values.limite),
+                      subscriptionsBudget: Number(values.assinaturas),
+                    };
+                    await upsertAlertSettings(updated);
+                    setAlertSettings(updated);
+                  },
                 })
               }
             >
@@ -245,19 +391,39 @@ export const Cartoes = ({ onOpenModal }: CartoesProps) => {
           <div className="goal">
             <div className="goal-row">
               <span>Uso do limite</span>
-              <span>{cards.length ? "62%" : "--"}</span>
+              <span>{cards.length ? `${usedLimitPercent}%` : "--"}</span>
             </div>
             <div className="progress">
-              <div className="progress-bar" style={{ width: "62%" }}></div>
+              <div
+                className="progress-bar"
+                style={{ width: `${usedLimitPercent}%` }}
+              ></div>
             </div>
           </div>
           <div className="goal">
             <div className="goal-row">
               <span>Assinaturas</span>
-              <span>R$ 210</span>
+              <span>
+                {subscriptionsTotal.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </span>
             </div>
             <div className="progress">
-              <div className="progress-bar soft" style={{ width: "40%" }}></div>
+              <div
+                className="progress-bar soft"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    alertSettings.subscriptionsBudget
+                      ? (subscriptionsTotal /
+                          alertSettings.subscriptionsBudget) *
+                          100
+                      : 0,
+                  )}%`,
+                }}
+              ></div>
             </div>
           </div>
         </div>

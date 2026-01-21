@@ -1,11 +1,54 @@
+import { useEffect, useState } from "react";
 import { Topbar } from "../components/Topbar";
 import { type ModalConfig } from "../app/types";
+import {
+  deleteInvestmentAllocation,
+  deleteInvestmentReturn,
+  fetchInvestmentAllocations,
+  fetchInvestmentReturns,
+  upsertInvestmentAllocation,
+  upsertInvestmentReturn,
+} from "../services/db";
 
 type InvestimentosProps = {
   onOpenModal: (config: ModalConfig) => void;
 };
 
+type Allocation = {
+  id: string;
+  label: string;
+  percent: number;
+  style?: "default" | "alt" | "soft";
+};
+
+type InvestmentReturn = {
+  id: string;
+  label: string;
+  percent: number;
+  style?: "default" | "alt" | "soft";
+};
+
 export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
+  const [allocations, setAllocations] = useState<Allocation[]>([]);
+  const [returns, setReturns] = useState<InvestmentReturn[]>([]);
+
+  const loadData = async () => {
+    try {
+      const [allocationsData, returnsData] = await Promise.all([
+        fetchInvestmentAllocations(),
+        fetchInvestmentReturns(),
+      ]);
+      setAllocations(allocationsData);
+      setReturns(returnsData);
+    } catch (error) {
+      console.error("Erro ao buscar investimentos:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   return (
     <section className="screen">
       <Topbar
@@ -23,25 +66,41 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
                 actionLabel: "Adicionar aporte",
                 fields: [
                   {
-                    name: "descricao",
+                    name: "label",
                     label: "Descricao",
                     type: "text",
                     placeholder: "Aporte mensal",
                     required: true,
                   },
                   {
-                    name: "valor",
-                    label: "Valor",
+                    name: "percent",
+                    label: "Percentual",
                     type: "number",
-                    placeholder: "1000",
+                    placeholder: "10",
                     required: true,
                   },
                   {
-                    name: "data",
-                    label: "Data",
-                    type: "date",
+                    name: "style",
+                    label: "Estilo",
+                    type: "select",
+                    options: [
+                      { label: "Padrao", value: "default" },
+                      { label: "Dourado", value: "alt" },
+                      { label: "Azul", value: "soft" },
+                    ],
                   },
                 ],
+                onSubmit: async (values) => {
+                  await upsertInvestmentAllocation({
+                    id: undefined,
+                    label: values.label,
+                    percent: Number(values.percent),
+                    style: values.style as "default" | "alt" | "soft",
+                  });
+                },
+                onSuccess: () => {
+                  void loadData();
+                },
               })
             }
           >
@@ -75,33 +134,102 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
               Comparar
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Renda fixa</span>
-              <span>45%</span>
+          {allocations.map((item) => (
+            <div className="goal" key={item.id}>
+              <div className="goal-row">
+                <span>{item.label}</span>
+                <span>{item.percent}%</span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${
+                    item.style === "alt"
+                      ? "alt"
+                      : item.style === "soft"
+                      ? "soft"
+                      : ""
+                  }`}
+                  style={{ width: `${item.percent}%` }}
+                ></div>
+              </div>
+              <div className="inline-actions">
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Editar distribuicao",
+                      description: "Atualize o percentual.",
+                      mode: "form",
+                      actionLabel: "Salvar",
+                      fields: [
+                        {
+                          name: "label",
+                          label: "Descricao",
+                          type: "text",
+                          required: true,
+                        },
+                        {
+                          name: "percent",
+                          label: "Percentual",
+                          type: "number",
+                          required: true,
+                        },
+                        {
+                          name: "style",
+                          label: "Estilo",
+                          type: "select",
+                          options: [
+                            { label: "Padrao", value: "default" },
+                            { label: "Dourado", value: "alt" },
+                            { label: "Azul", value: "soft" },
+                          ],
+                        },
+                      ],
+                      initialValues: {
+                        label: item.label,
+                        percent: String(item.percent),
+                        style: item.style ?? "default",
+                      },
+                      onSubmit: async (values) => {
+                        await upsertInvestmentAllocation({
+                          id: item.id,
+                          label: values.label,
+                          percent: Number(values.percent),
+                          style: values.style as "default" | "alt" | "soft",
+                        });
+                      },
+                      onSuccess: () => {
+                        void loadData();
+                      },
+                    })
+                  }
+                >
+                  Editar
+                </button>
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Excluir distribuicao",
+                      description: "Confirme a exclusao.",
+                      mode: "form",
+                      actionLabel: "Excluir",
+                      onSubmit: async () => {
+                        await deleteInvestmentAllocation(item.id);
+                      },
+                      onSuccess: () => {
+                        void loadData();
+                      },
+                    })
+                  }
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "45%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Fundos imobiliarios</span>
-              <span>28%</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar alt" style={{ width: "28%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>Acoes</span>
-              <span>27%</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "27%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
         <div className="panel">
           <div className="panel-header">
@@ -127,24 +255,87 @@ export const Investimentos = ({ onOpenModal }: InvestimentosProps) => {
               Periodo
             </button>
           </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>12 meses</span>
-              <span className="statement-amount up">+ 14,2%</span>
+          {returns.map((item) => (
+            <div className="goal" key={item.id}>
+              <div className="goal-row">
+                <span>{item.label}</span>
+                <span className="statement-amount up">+ {item.percent}%</span>
+              </div>
+              <div className="progress">
+                <div
+                  className={`progress-bar ${
+                    item.style === "soft" ? "soft" : ""
+                  }`}
+                  style={{ width: `${Math.min(100, item.percent)}%` }}
+                ></div>
+              </div>
+              <div className="inline-actions">
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Editar rentabilidade",
+                      description: "Atualize o percentual.",
+                      mode: "form",
+                      actionLabel: "Salvar",
+                      fields: [
+                        {
+                          name: "label",
+                          label: "Periodo",
+                          type: "text",
+                          required: true,
+                        },
+                        {
+                          name: "percent",
+                          label: "Percentual",
+                          type: "number",
+                          required: true,
+                        },
+                      ],
+                      initialValues: {
+                        label: item.label,
+                        percent: String(item.percent),
+                      },
+                      onSubmit: async (values) => {
+                        await upsertInvestmentReturn({
+                          id: item.id,
+                          label: values.label,
+                          percent: Number(values.percent),
+                          style: item.style,
+                        });
+                      },
+                      onSuccess: () => {
+                        void loadData();
+                      },
+                    })
+                  }
+                >
+                  Editar
+                </button>
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() =>
+                    onOpenModal({
+                      title: "Excluir rentabilidade",
+                      description: "Confirme a exclusao.",
+                      mode: "form",
+                      actionLabel: "Excluir",
+                      onSubmit: async () => {
+                        await deleteInvestmentReturn(item.id);
+                      },
+                      onSuccess: () => {
+                        void loadData();
+                      },
+                    })
+                  }
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "72%" }}></div>
-            </div>
-          </div>
-          <div className="goal">
-            <div className="goal-row">
-              <span>24 meses</span>
-              <span className="statement-amount up">+ 22,9%</span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar soft" style={{ width: "60%" }}></div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </section>

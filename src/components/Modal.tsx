@@ -34,6 +34,7 @@ export const Modal = ({ config, onClose }: ModalProps) => {
     try {
       setSubmitting(true);
       await config.onSubmit(values);
+      config.onSuccess?.();
       onClose();
     } finally {
       setSubmitting(false);

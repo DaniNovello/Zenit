@@ -123,6 +123,8 @@
     rgba(15, 118, 110, 0.12),
     rgba(20, 184, 166, 0.25)
   );
+  display: grid;
+  gap: 8px;
 }
 
 .sidebar-card-title {
@@ -139,6 +141,10 @@
 .sidebar-card-note {
   font-size: 12px;
   color: var(--muted);
+}
+
+.logout-btn {
+  justify-self: start;
 }
 
 .content {
@@ -198,8 +204,8 @@ h1 {
 }
 
 .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
@@ -210,6 +216,8 @@ h1 {
   padding: 20px 22px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(12px);
+  flex: 1 1 220px;
+  min-width: 200px;
 }
 
 .card-label {
@@ -297,6 +305,17 @@ h2 {
   box-shadow: 0 15px 30px rgba(15, 118, 110, 0.35);
 }
 
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-actions .ghost {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: inherit;
+}
+
 .credit-card.alt {
   background: linear-gradient(135deg, #f6c351, #f59e0b);
   color: #2d1b00;
@@ -344,6 +363,31 @@ h2 {
   gap: 14px;
 }
 
+.search-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search-input {
+  border: 1px solid var(--input-border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  min-width: 220px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .statement-row {
   display: flex;
   align-items: center;
@@ -351,6 +395,12 @@ h2 {
   gap: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--divider);
+}
+
+.inline-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .statement-title {
@@ -376,6 +426,12 @@ h2 {
 
 .goal {
   display: grid;
+  gap: 8px;
+}
+
+.goal-actions {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -687,7 +743,7 @@ h2 {
   }
 
   .cards {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .grid {
